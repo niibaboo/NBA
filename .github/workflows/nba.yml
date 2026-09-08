@@ -15,7 +15,8 @@ jobs:
           python-version: '3.11'
       - run: pip install requests
       - run: python nba_model.py
-      - uses: peaceiris/actions-gh-pages@v4
+      - name: Deploy to Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
