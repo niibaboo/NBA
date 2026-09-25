@@ -50,6 +50,7 @@ GAMELOG_BASE_FMT = "https://site.web.api.espn.com/apis/common/v3/sports/basketba
 REQUEST_DELAY = 1.2  # same conservative pacing as Blitz IQ -- no official rate limit published
 RECENT_GAMES = 7  # matches this project's existing "last 7 games" framing
 PRIOR_STRENGTH = 4
+DEFAULT_TEAM_STD = 11.0  # rough per-team points stdev, same role as Blitz IQ's
 ROSTER_CAP = 15  # players checked per team -- covers the full rotation without
                    # hammering the gamelog endpoint for deep-bench players who'd
                    # get filtered out by the games-played floor anyway
@@ -100,6 +101,140 @@ def get_scoreboard(league_key):
 
 
 roster_cache = {}
+team_form_cache = {}
+
+
+def _extract_completed_team_games(events, team_id):
+    """Same shared parsing logic as Blitz IQ's _extract_completed_games --
+    identical ESPN schedule response shape (competitions[0].competitors[]
+    with a score.value per side), just ported to the basketball host."""
+    completed = [e for e in events if e.get('competitions', [{}])[0].get('status', {})
+                 .get('type', {}).get('completed')]
+    completed.sort(key=lambda e: e.get('date', ''))
+    recent = completed[-RECENT_GAMES:]
+    scored, allowed = [], []
+    for e in recent:
+        comp = e['competitions'][0]
+        competitors = comp.get('competitors', [])
+        me = next((c for c in competitors if str(c['team']['id']) == str(team_id)), None)
+        opp = next((c for c in competitors if str(c['team']['id']) != str(team_id)), None)
+        if not me or not opp:
+            continue
+        try:
+            scored.append(float(me['score']['value']))
+            allowed.append(float(opp['score']['value']))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return scored, allowed
+
+
+def get_team_form(league_key, team_id):
+    """Last N completed games for a team -- points scored and allowed.
+    Same Week-1-style fallback as Blitz IQ: early in a new season a team
+    can have zero completed games yet, so this falls back to the tail of
+    last season rather than going dark for the first week or two."""
+    cache_key = (league_key, team_id)
+    if cache_key in team_form_cache:
+        return team_form_cache[cache_key]
+
+    r = _get(f"{BASE_FMT.format(league=league_key)}/teams/{team_id}/schedule")
+    scored, allowed, source = [], [], 'current'
+    if r is not None:
+        try:
+            events = r.json().get('events', [])
+            scored, allowed = _extract_completed_team_games(events, team_id)
+        except Exception as e:
+            print(f"  [!] couldn't parse schedule for team {team_id}: {e}")
+
+    if not scored:
+        current_year = datetime.now().year
+        r2 = _get(f"{BASE_FMT.format(league=league_key)}/teams/{team_id}/schedule",
+                   params={"season": current_year - 1})
+        if r2 is not None:
+            try:
+                events2 = r2.json().get('events', [])
+                scored, allowed = _extract_completed_team_games(events2, team_id)
+                source = 'prior_season'
+            except Exception as e:
+                print(f"  [!] couldn't parse prior-season schedule for team {team_id}: {e}")
+
+    if not scored:
+        return None
+
+    n = len(scored)
+    form = {
+        'avg_scored': round(sum(scored) / n, 1), 'avg_allowed': round(sum(allowed) / n, 1),
+        'n_games': n, 'source': source, 'scored_list': scored, 'allowed_list': allowed,
+    }
+    team_form_cache[cache_key] = form
+    return form
+
+
+def league_averages(all_forms, fallback_scored):
+    """IMPORTANT: must be called SEPARATELY per league (NBA vs WNBA),
+    never on a blended set -- NBA teams average ~110-115 pts/game, WNBA
+    meaningfully less, so a shared average would make WNBA teams look
+    artificially cold and NBA teams artificially hot against the wrong
+    baseline."""
+    scored = [f['avg_scored'] for f in all_forms if f]
+    allowed = [f['avg_allowed'] for f in all_forms if f]
+    lg_scored = sum(scored) / len(scored) if scored else fallback_scored
+    lg_allowed = sum(allowed) / len(allowed) if allowed else fallback_scored
+    return lg_scored, lg_allowed
+
+
+def recency_weighted_team(values):
+    n = len(values)
+    if n == 0:
+        return None
+    wts = [1.3 ** i for i in range(n)]
+    return sum(w * v for w, v in zip(wts, values)) / sum(wts)
+
+
+def shrink_team(value, n, league_avg, prior_strength=PRIOR_STRENGTH):
+    return (n * value + prior_strength * league_avg) / (n + prior_strength)
+
+
+def predict_team_total(h_form, a_form, lg_scored, lg_allowed):
+    """Same Normal-distribution approach as Blitz IQ -- team scores are
+    large, non-discrete-feeling totals, not a Poisson-shaped count."""
+    h_recent_scored = recency_weighted_team(h_form['scored_list'])
+    h_recent_allowed = recency_weighted_team(h_form['allowed_list'])
+    a_recent_scored = recency_weighted_team(a_form['scored_list'])
+    a_recent_allowed = recency_weighted_team(a_form['allowed_list'])
+
+    h_scored = shrink_team(h_recent_scored, h_form['n_games'], lg_scored)
+    h_allowed = shrink_team(h_recent_allowed, h_form['n_games'], lg_allowed)
+    a_scored = shrink_team(a_recent_scored, a_form['n_games'], lg_scored)
+    a_allowed = shrink_team(a_recent_allowed, a_form['n_games'], lg_allowed)
+
+    exp_home = h_scored * (a_allowed / lg_allowed)
+    exp_away = a_scored * (h_allowed / lg_allowed)
+    exp_total = round(exp_home + exp_away, 1)
+    total_std = math.sqrt(DEFAULT_TEAM_STD ** 2 + DEFAULT_TEAM_STD ** 2)
+
+    return {
+        'exp_home': round(exp_home, 1), 'exp_away': round(exp_away, 1),
+        'exp_total': exp_total, 'total_std': round(total_std, 1),
+    }
+
+
+def norm_cdf(x, mean, std):
+    if std <= 0:
+        return 1.0 if x >= mean else 0.0
+    z = (x - mean) / (std * math.sqrt(2))
+    return 0.5 * (1 + math.erf(z))
+
+
+def normal_prop(mean, std, factor=0.72, round_to=0.5):
+    if mean is None or std is None:
+        return None
+    raw_line = mean * factor
+    line = math.floor(raw_line / round_to) * round_to
+    if line < round_to:
+        line = round_to
+    prob_over = 1 - norm_cdf(line, mean, std)
+    return {"line": line, "prob": round(prob_over * 100), "avg": mean}
 
 
 def get_roster(league_key, team_id):
@@ -286,6 +421,10 @@ def hit_rate(values, line):
     return {"hits": hits, "total": len(values)}
 
 
+LEAGUE_FALLBACK_AVG = {"nba": 113.0, "wnba": 82.0}  # only used if literally no team
+                                                        # in a league has any form data yet
+
+
 def build_predictions():
     predictions = []
     for league in LEAGUES:
@@ -296,6 +435,14 @@ def build_predictions():
             print(f"No {league_name} teams returned — skipping this league for now, "
                   f"still trying the others.")
             continue
+
+        print(f"Fetching {league_name} team form for {len(teams)} teams…")
+        all_forms = {}
+        for t in teams:
+            tid = t['team']['id']
+            all_forms[tid] = get_team_form(league_key, tid)
+        lg_scored, lg_allowed = league_averages(all_forms.values(), LEAGUE_FALLBACK_AVG.get(league_key, 100.0))
+        print(f"  {league_name} averages: {lg_scored:.1f} scored/game, {lg_allowed:.1f} allowed/game")
 
         print(f"Fetching {league_name}'s today's scoreboard…")
         events = get_scoreboard(league_key)
@@ -312,6 +459,16 @@ def build_predictions():
                 continue
 
             h_id, a_id = home['team']['id'], away['team']['id']
+            h_form = all_forms.get(h_id) or get_team_form(league_key, h_id)
+            a_form = all_forms.get(a_id) or get_team_form(league_key, a_id)
+            team_total_proj = {}
+            if h_form and a_form:
+                team_total_proj = predict_team_total(h_form, a_form, lg_scored, lg_allowed)
+            else:
+                print(f"    no team form for one/both sides of {away['team']['displayName']} @ "
+                      f"{home['team']['displayName']} — Team/Game Total skipped for this game, "
+                      f"player props unaffected")
+
             print(f"  Player props: {away['team']['displayName']} @ {home['team']['displayName']} ({league_name})")
             home_props = project_player_props(league_key, h_id)
             away_props = project_player_props(league_key, a_id)
@@ -321,6 +478,8 @@ def build_predictions():
                 'match': f"{away['team']['displayName']} @ {home['team']['displayName']}",
                 'home_team': home['team']['displayName'], 'away_team': away['team']['displayName'],
                 'home_props': home_props, 'away_props': away_props,
+                'home_form': h_form, 'away_form': a_form,
+                **team_total_proj,
             })
     return predictions
 
@@ -332,6 +491,50 @@ def build_legs(predictions):
         game_id = p.get("game_id")
         game_date = (p.get("date") or "")[:10]
         league_name = p.get("league", "")
+        hf, af = p.get("home_form"), p.get("away_form")
+
+        if hf and af and p.get("exp_home") is not None:
+            home_total = normal_prop(p["exp_home"], DEFAULT_TEAM_STD)
+            if home_total:
+                legs.append({
+                    "match": f"{match_label} ({league_name})",
+                    "market": f"{p['home_team']} Over {home_total['line']} Points",
+                    "prob": home_total["prob"], "category": "Team Total",
+                    "hit_rate": hit_rate(hf.get("scored_list"), home_total["line"]),
+                    "detail": f"{league_name} · proj {home_total['avg']} pts ({hf['n_games']}gm"
+                              f"{' · last season' if hf.get('source') == 'prior_season' else ''})",
+                    "history": "/".join(str(v) for v in hf.get("scored_list", [])),
+                    "game_id": game_id, "game_date": game_date, "line": home_total["line"],
+                    "is_home": True, "league": league_name,
+                })
+            away_total = normal_prop(p["exp_away"], DEFAULT_TEAM_STD)
+            if away_total:
+                legs.append({
+                    "match": f"{match_label} ({league_name})",
+                    "market": f"{p['away_team']} Over {away_total['line']} Points",
+                    "prob": away_total["prob"], "category": "Team Total",
+                    "hit_rate": hit_rate(af.get("scored_list"), away_total["line"]),
+                    "detail": f"{league_name} · proj {away_total['avg']} pts ({af['n_games']}gm"
+                              f"{' · last season' if af.get('source') == 'prior_season' else ''})",
+                    "history": "/".join(str(v) for v in af.get("scored_list", [])),
+                    "game_id": game_id, "game_date": game_date, "line": away_total["line"],
+                    "is_home": False, "league": league_name,
+                })
+            game_total = normal_prop(p["exp_total"], p["total_std"])
+            if game_total:
+                legs.append({
+                    "match": f"{match_label} ({league_name})",
+                    "market": f"Game Over {game_total['line']} Total Points",
+                    "prob": game_total["prob"], "category": "Game Total",
+                    # No hit_rate -- same reasoning as Blitz IQ: no real paired
+                    # "these two teams' actual combined score" history exists.
+                    "hit_rate": None,
+                    "detail": f"{league_name} · proj {game_total['avg']} pts ({hf['n_games']}v{af['n_games']}gm)",
+                    "history": None,
+                    "game_id": game_id, "game_date": game_date, "line": game_total["line"],
+                    "league": league_name,
+                })
+
         for team_name, props in [(p["home_team"], p.get("home_props") or []),
                                    (p["away_team"], p.get("away_props") or [])]:
             for prop in props:
@@ -649,7 +852,14 @@ HTML_TEMPLATE = """<!DOCTYPE html><html><head><meta charset="utf-8">
 CARD_TEMPLATE = """<div style="background:#1a1310;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #3a2a20">
   <div style="font-size:11px;color:#998;margin-bottom:4px">{date} · <span style="color:#ff9a2e">{league}</span></div>
   <div style="font-size:17px;font-weight:bold;margin-bottom:10px">{match}</div>
+  {team_total_html}
   {player_props_html}
+</div>"""
+
+TEAM_TOTAL_ROW = """<div style="display:flex;justify-content:space-between;text-align:center;background:#0f0a08;border-radius:8px;padding:8px;margin-bottom:8px">
+  <div><div style="color:#998;font-size:11px">{away_team}</div><div style="color:#ffeb3b;font-size:18px;font-weight:bold">{exp_away}</div></div>
+  <div><div style="color:#998;font-size:11px">TOTAL</div><div style="color:#7ec8ff;font-size:20px;font-weight:bold">{exp_total}</div></div>
+  <div><div style="color:#998;font-size:11px">{home_team}</div><div style="color:#ffeb3b;font-size:18px;font-weight:bold">{exp_home}</div></div>
 </div>"""
 
 PLAYER_PROP_ROW = """<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
@@ -668,6 +878,13 @@ def player_props_section(team_label, props):
 def make_html(predictions):
     cards = "".join(CARD_TEMPLATE.format(
         date=p['date'][:16].replace('T', ' '), match=p['match'], league=p.get('league', ''),
+        team_total_html=(
+            TEAM_TOTAL_ROW.format(
+                away_team=p['away_team'], home_team=p['home_team'],
+                exp_away=p['exp_away'], exp_home=p['exp_home'], exp_total=p['exp_total'],
+            ) if p.get('exp_total') is not None else
+            '<div style="color:#776;font-size:11px;margin-bottom:8px">Team Total unavailable for this game (missing team form)</div>'
+        ),
         player_props_html=(
             player_props_section(p['away_team'], p.get('away_props', []))
             + player_props_section(p['home_team'], p.get('home_props', []))
@@ -692,14 +909,17 @@ def make_html(predictions):
 def write_csv(predictions, path):
     with open(path, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Date', 'League', 'Match', 'Team', 'Player', 'RebProj', 'AstProj', 'RaProj', 'SampleSize',
+        writer.writerow(['Date', 'League', 'Match', 'HomeTeam', 'AwayTeam', 'ExpHome', 'ExpAway', 'ExpTotal',
+                          'Team', 'Player', 'RebProj', 'AstProj', 'RaProj', 'SampleSize',
                           'RebValues', 'AstValues'])
         for p in predictions:
             for team_label, props in [(p['away_team'], p.get('away_props', [])),
                                        (p['home_team'], p.get('home_props', []))]:
                 for prop in props:
                     writer.writerow([
-                        p['date'], p.get('league', ''), p['match'], team_label, prop['name'],
+                        p['date'], p.get('league', ''), p['match'], p['home_team'], p['away_team'],
+                        p.get('exp_home', ''), p.get('exp_away', ''), p.get('exp_total', ''),
+                        team_label, prop['name'],
                         prop['reb_proj'], prop['ast_proj'], prop['ra_proj'], prop['n_games'],
                         '; '.join(str(v) for v in prop['rebs']), '; '.join(str(v) for v in prop['asts']),
                     ])
