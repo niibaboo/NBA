@@ -155,13 +155,24 @@ def _fetch_gamelog_values(league_key, athlete_id, stat_key, season):
     """Same defensive parsing as Blitz IQ's _fetch_gamelog_values --
     identical API family, identical uncertainty about exact label names,
     so identical treatment: try the plausible label, print a diagnostic
-    with the REAL labels found if it doesn't match, never guess silently."""
+    with the REAL labels found if it doesn't match, never guess silently.
+
+    ORDER FIX (Orange Line only, not carried in Blitz IQ): Blitz IQ's own
+    comments flag that this event list's chronological order was never
+    confirmed -- fine there, since nothing in that script depends on
+    "most recent" specifically. Orange Line's Real Streak DOES depend on
+    it (walking backward from the most recent game), so this version
+    explicitly captures each game's date where available and SORTS by
+    it, rather than trusting whatever order the API happens to return.
+    If no date field is found at all, falls back to API order as-is and
+    prints a diagnostic -- so a missing date field degrades visibly
+    (streak feature may be unreliable) instead of silently."""
     r = _get(GAMELOG_BASE_FMT.format(league=league_key, athlete_id=athlete_id),
              params={"season": season})
-    values = []
+    dated_values = []  # (date_str_or_None, value)
     if r is None:
         print(f"    [!] gamelog fetch failed for athlete {athlete_id}, season {season} (no response)")
-        return values
+        return dated_values
     try:
         data = r.json()
         top_keys = list(data.keys())
@@ -189,15 +200,25 @@ def _fetch_gamelog_values(league_key, athlete_id, stat_key, season):
                     if stat_key in root_labels:
                         idx = root_labels.index(stat_key)
                         try:
-                            values.append(float(stats[idx]))
+                            value = float(stats[idx])
                         except (IndexError, ValueError, TypeError):
                             continue
-        if season_data and not values:
+                        date_str = (game.get('gameDate') or game.get('date')
+                                    or game.get('eventDate') or None)
+                        dated_values.append((date_str, value))
+        if season_data and not dated_values:
             print(f"    [!] gamelog for athlete {athlete_id}, season {season}, stat '{stat_key}': no matching values found "
                   f"-- stat_key likely doesn't match ESPN's actual label name. Check the [DIAG] line above for real labels.")
     except Exception as e:
         print(f"  [!] couldn't parse gamelog for athlete {athlete_id}, season {season}: {e}")
-    return values
+
+    if dated_values and all(d is not None for d, _ in dated_values):
+        dated_values.sort(key=lambda pair: pair[0])  # guarantees oldest -> newest
+    elif dated_values:
+        print(f"    [DIAG] athlete {athlete_id}, season {season}, stat '{stat_key}': some/all games missing a "
+              f"date field -- falling back to API order as-is. Real Streak for this player may be unreliable "
+              f"until this is confirmed against a real response.")
+    return [v for _, v in dated_values]
 
 
 def get_player_gamelog(league_key, athlete_id, stat_key):
@@ -208,7 +229,7 @@ def get_player_gamelog(league_key, athlete_id, stat_key):
     values = _fetch_gamelog_values(league_key, athlete_id, stat_key, current_year)
     if not values:
         values = _fetch_gamelog_values(league_key, athlete_id, stat_key, current_year - 1)
-    values = values[-RECENT_GAMES:]
+    values = values[-RECENT_GAMES:]  # oldest-first list -- last N entries ARE the most recent N games
     player_gamelog_cache[cache_key] = values
     return values
 
@@ -334,6 +355,145 @@ def build_legs(predictions):
                         "is_home": team_name == p["home_team"], "league": league_name,
                     })
     return legs
+
+
+# --- Hot Form / Real Streak ---------------------------------------------
+# Same distinction as every other tool in this suite -- "Hot Form" is an
+# AVERAGE over the last HOT_FORM_MIN_GAMES games, which can flag a player
+# even if their most recent game was quiet, as long as earlier games
+# pulled the average up. "Real Streak" is a stricter, separate check:
+# walking backward from the most recent game (now that _fetch_gamelog_values
+# sorts by date rather than trusting API order) and counting how many in a
+# ROW cleared a per-game threshold, stopping at the first one that didn't.
+HOT_FORM_MIN = {"REB": 8.0, "AST": 5.0, "RA": 13.0}
+HOT_FORM_MIN_GAMES = 5
+REAL_STREAK_THRESHOLD = {"REB": 6.0, "AST": 4.0, "RA": 10.0}
+REAL_STREAK_MIN_LENGTH = 3
+STAT_LABELS = {"REB": "Rebounds", "AST": "Assists", "RA": "Rebounds+Assists"}
+
+
+def _last_n_avg(values, n):
+    if len(values) < n:
+        return None
+    lastn = values[-n:]
+    return round(sum(lastn) / len(lastn), 2), lastn
+
+
+def _current_stat_streak(values, threshold):
+    """values must be oldest-first (see _fetch_gamelog_values) -- walking
+    in REVERSE goes from the most recent game backward."""
+    streak = 0
+    for v in reversed(values):
+        if v >= threshold:
+            streak += 1
+        else:
+            break
+    return streak
+
+
+def build_hot_form_entries(predictions):
+    entries = []
+    for p in predictions:
+        for team_name, props in [(p["home_team"], p.get("home_props") or []),
+                                   (p["away_team"], p.get("away_props") or [])]:
+            for prop in props:
+                for stat_key, values in [("REB", prop["rebs"]), ("AST", prop["asts"]), ("RA", prop["ra_values"])]:
+                    result = _last_n_avg(values, HOT_FORM_MIN_GAMES)
+                    if not result:
+                        continue
+                    avg, lastn = result
+                    if avg >= HOT_FORM_MIN[stat_key]:
+                        entries.append({
+                            "name": prop["name"], "team": team_name, "league": p.get("league", ""),
+                            "match": p["match"], "stat": stat_key, "avg": avg, "values": lastn,
+                        })
+    entries.sort(key=lambda e: -e["avg"])
+    return entries
+
+
+def build_real_streak_entries(predictions):
+    entries = []
+    for p in predictions:
+        for team_name, props in [(p["home_team"], p.get("home_props") or []),
+                                   (p["away_team"], p.get("away_props") or [])]:
+            for prop in props:
+                for stat_key, values in [("REB", prop["rebs"]), ("AST", prop["asts"]), ("RA", prop["ra_values"])]:
+                    streak_len = _current_stat_streak(values, REAL_STREAK_THRESHOLD[stat_key])
+                    if streak_len >= REAL_STREAK_MIN_LENGTH:
+                        entries.append({
+                            "name": prop["name"], "team": team_name, "league": p.get("league", ""),
+                            "match": p["match"], "stat": stat_key, "streak_len": streak_len,
+                            "streak_games": values[-streak_len:], "full_sample": streak_len >= len(values),
+                        })
+    entries.sort(key=lambda e: -e["streak_len"])
+    return entries
+
+
+STREAK_ENTRY_TEMPLATE = """<div style="background:#241a14;border-radius:8px;padding:10px 12px;margin:8px 0;display:flex;gap:10px;align-items:flex-start">
+  <div style="min-width:56px;text-align:center;background:#0f0a08;border:1px solid #3a2a20;border-radius:8px;padding:6px 4px;flex-shrink:0">
+    <div style="font-size:9px;color:#998">AVG</div>
+    <div style="font-size:17px;font-weight:bold;color:#7dd3a8">{avg}</div>
+  </div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:10px;color:#998">{league} · {match}</div>
+    <div style="font-size:14px;font-weight:bold;margin:1px 0 4px">{name} ({team}) <span style="color:#998;font-weight:normal;font-size:11px">{stat_label}</span></div>
+    <div style="font-size:10px;color:#998">last {n} (old→new): {values_str}</div>
+  </div>
+</div>"""
+
+REAL_STREAK_ENTRY_TEMPLATE = """<div style="background:#241a14;border-radius:8px;padding:10px 12px;margin:8px 0;display:flex;gap:10px;align-items:flex-start">
+  <div style="min-width:56px;text-align:center;background:#0f0a08;border:1px solid #f59e0b;border-radius:8px;padding:6px 4px;flex-shrink:0">
+    <div style="font-size:9px;color:#998">STREAK</div>
+    <div style="font-size:17px;font-weight:bold;color:#f59e0b">{streak_len}{plus}</div>
+  </div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:10px;color:#998">{league} · {match}</div>
+    <div style="font-size:14px;font-weight:bold;margin:1px 0 4px">{name} ({team}) <span style="color:#998;font-weight:normal;font-size:11px">{stat_label}</span></div>
+    <div style="font-size:10px;color:#998">{streak_len} straight ≥{threshold} (old→new): {values_str}</div>
+  </div>
+</div>"""
+
+STREAK_PANEL_TEMPLATE = """<div style="background:#1a1310;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #3a2a20">
+  <div style="font-size:14px;font-weight:bold;margin-bottom:10px">🔥 Hot Form &amp; Streaks</div>
+  <div style="font-size:11px;color:#998;margin-bottom:10px">
+    Raw recent-FORM screens, not probabilistic predictions like the props above. Hot Form
+    (average) and Real Streak (consecutive, no break) measure genuinely different things --
+    a player can appear in one, both, or neither. Cross-check against that player's own prop
+    line above before treating either alone as a signal.
+  </div>
+  {hot_form_section}
+  {real_streak_section}
+</div>"""
+
+
+def _render_stat_section(entries, template, icon, label, extra_fields_fn):
+    if not entries:
+        return ""
+    cards = "".join(
+        template.format(**extra_fields_fn(e), name=e["name"], team=e["team"], league=e["league"],
+                         match=e["match"], stat_label=STAT_LABELS[e["stat"]])
+        for e in entries
+    )
+    return f'<div style="font-size:12px;font-weight:700;color:#e8dcd0;margin:10px 0 4px">{icon} {label}</div>{cards}'
+
+
+def render_streak_panel(hot_form_entries, real_streak_entries):
+    if not hot_form_entries and not real_streak_entries:
+        return ""
+    hot_form_html = _render_stat_section(
+        hot_form_entries, STREAK_ENTRY_TEMPLATE, "📊",
+        f"Hot Form (avg over last {HOT_FORM_MIN_GAMES})",
+        lambda e: {"avg": e["avg"], "n": HOT_FORM_MIN_GAMES, "values_str": "/".join(str(v) for v in e["values"])},
+    )
+    real_streak_html = _render_stat_section(
+        real_streak_entries, REAL_STREAK_ENTRY_TEMPLATE, "🔥",
+        f"Real Streak (≥{REAL_STREAK_MIN_LENGTH}+ CONSECUTIVE games)",
+        lambda e: {"streak_len": e["streak_len"], "plus": "+" if e["full_sample"] else "",
+                    "threshold": REAL_STREAK_THRESHOLD[e["stat"]],
+                    "values_str": "/".join(str(v) for v in e["streak_games"])},
+    )
+    return STREAK_PANEL_TEMPLATE.format(hot_form_section=hot_form_html, real_streak_section=real_streak_html)
+
 
 
 BUILDER_TEMPLATE = """
@@ -482,6 +642,7 @@ HTML_TEMPLATE = """<!DOCTYPE html><html><head><meta charset="utf-8">
 <p style="text-align:center;color:#998;font-size:11px">Recency-weighted, Poisson-projected · Last {recent}g · {generated}</p>
 <p style="text-align:center;margin-bottom:16px"><a href="orange_line_predictions.csv" download style="background:#2a201a;border:1px solid #443;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px">⬇ Download CSV</a></p>
 {builder}
+{streak_panel}
 {cards}
 </body></html>"""
 
@@ -518,8 +679,13 @@ def make_html(predictions):
     legs = build_legs(predictions)
     builder = BUILDER_TEMPLATE.format(legs_json=json.dumps(legs)) if legs else ""
 
+    hot_form_entries = build_hot_form_entries(predictions)
+    real_streak_entries = build_real_streak_entries(predictions)
+    streak_panel = render_streak_panel(hot_form_entries, real_streak_entries)
+
     return HTML_TEMPLATE.format(
-        recent=RECENT_GAMES, generated=datetime.now().strftime('%d %b %H:%M'), builder=builder, cards=cards,
+        recent=RECENT_GAMES, generated=datetime.now().strftime('%d %b %H:%M'),
+        builder=builder, streak_panel=streak_panel, cards=cards,
     )
 
 
