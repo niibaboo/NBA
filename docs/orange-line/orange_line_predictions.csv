@@ -1,25 +1,25 @@
-Date,League,Match,Team,Player,RebProj,AstProj,RaProj,SampleSize,RebValues,AstValues
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Bam Adebayo,6.2,2.3,8.4,7,5.0; 12.0; 8.0; 9.0; 4.0; 7.0; 5.0,4.0; 2.0; 4.0; 3.0; 0.0; 2.0; 1.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Giannis Antetokounmpo,9.4,4.4,13.8,7,11.0; 8.0; 14.0; 20.0; 14.0; 7.0; 10.0,8.0; 7.0; 9.0; 7.0; 5.0; 4.0; 3.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Simone Fontecchio,4.1,2.0,6.1,7,0.0; 4.0; 4.0; 2.0; 3.0; 5.0; 3.0,3.0; 1.0; 2.0; 1.0; 1.0; 1.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Myron Gardner,4.7,1.5,6.3,7,1.0; 2.0; 5.0; 7.0; 1.0; 7.0; 4.0,1.0; 0.0; 1.0; 2.0; 0.0; 0.0; 1.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Vladislav Goldin,2.9,1.2,4.1,7,1.0; 2.0; 1.0; 0.0; 0.0; 5.0; 0.0,0.0; 0.0; 1.0; 1.0; 0.0; 0.0; 0.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Tim Hardaway Jr.,3.1,2.0,5.0,7,0.0; 2.0; 3.0; 1.0; 1.0; 2.0; 2.0,0.0; 0.0; 1.0; 1.0; 2.0; 0.0; 3.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Keshad Johnson,4.4,3.0,7.3,7,3.0; 2.0; 5.0; 3.0; 5.0; 7.0; 1.0,0.0; 1.0; 3.0; 3.0; 2.0; 5.0; 3.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Nikola Jovic,5.0,3.2,8.2,7,6.0; 5.0; 6.0; 3.0; 3.0; 8.0; 3.0,2.0; 5.0; 4.0; 0.0; 3.0; 7.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Trevor Keels,2.6,1.7,4.3,7,0.0; 0.0; 0.0; 1.0; 1.0; 2.0; 1.0,0.0; 0.0; 0.0; 0.0; 0.0; 2.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Pelle Larsson,3.0,2.2,5.3,7,0.0; 2.0; 0.0; 0.0; 3.0; 2.0; 2.0,0.0; 0.0; 0.0; 1.0; 3.0; 3.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Bez Mbeng,4.4,3.5,7.9,7,5.0; 3.0; 6.0; 5.0; 2.0; 3.0; 4.0,6.0; 1.0; 7.0; 6.0; 1.0; 3.0; 4.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Miami Heat,Davion Mitchell,3.3,3.7,7.0,7,4.0; 1.0; 1.0; 6.0; 0.0; 4.0; 0.0,9.0; 6.0; 6.0; 12.0; 2.0; 1.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Kyle Anderson,3.4,3.8,7.2,7,6.0; 3.0; 4.0; 0.0; 3.0; 1.0; 2.0,6.0; 5.0; 4.0; 2.0; 3.0; 4.0; 6.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Scottie Barnes,6.8,4.1,11.0,7,11.0; 5.0; 6.0; 6.0; 10.0; 12.0; 4.0,6.0; 3.0; 9.0; 4.0; 4.0; 4.0; 5.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,RJ Barrett,4.6,3.1,7.7,7,6.0; 8.0; 4.0; 6.0; 3.0; 2.0; 4.0,2.0; 5.0; 4.0; 4.0; 1.0; 4.0; 3.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Jamison Battle,2.9,1.6,4.5,7,2.0; 3.0; 1.0; 3.0; 1.0; 1.0; 1.0,0.0; 0.0; 0.0; 0.0; 2.0; 1.0; 1.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Chucky Hepburn,2.5,2.5,5.0,7,0.0; 1.0; 0.0; 0.0; 3.0; 1.0; 0.0,2.0; 0.0; 2.0; 0.0; 8.0; 3.0; 0.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Andre Jackson Jr.,3.4,1.4,4.8,7,1.0; 0.0; 0.0; 0.0; 3.0; 1.0; 5.0,2.0; 0.0; 0.0; 0.0; 1.0; 0.0; 1.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Trayce Jackson-Davis,5.2,2.3,7.5,7,1.0; 4.0; 2.0; 10.0; 7.0; 5.0; 4.0,1.0; 1.0; 0.0; 3.0; 1.0; 3.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Trey Jemison III,3.9,1.4,5.3,7,0.0; 2.0; 7.0; 5.0; 2.0; 3.0; 2.0,0.0; 0.0; 4.0; 0.0; 1.0; 0.0; 0.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,A.J. Lawson,3.1,1.3,4.3,7,1.0; 1.0; 0.0; 5.0; 1.0; 1.0; 2.0,0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 1.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Kawhi Leonard,3.8,2.5,6.3,7,6.0; 10.0; 5.0; 4.0; 2.0; 2.0; 0.0,1.0; 4.0; 5.0; 2.0; 2.0; 1.0; 2.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Alijah Martin,3.1,1.3,4.4,7,0.0; 0.0; 0.0; 3.0; 2.0; 0.0; 4.0,0.0; 0.0; 0.0; 1.0; 0.0; 1.0; 0.0
-2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Collin Murray-Boyles,4.1,2.3,6.4,7,4.0; 1.0; 3.0; 2.0; 1.0; 7.0; 3.0,0.0; 2.0; 1.0; 0.0; 1.0; 6.0; 1.0
+Date,League,Match,HomeTeam,AwayTeam,ExpHome,ExpAway,ExpTotal,Team,Player,RebProj,AstProj,RaProj,SampleSize,RebValues,AstValues
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Bam Adebayo,6.2,2.3,8.4,7,5.0; 12.0; 8.0; 9.0; 4.0; 7.0; 5.0,4.0; 2.0; 4.0; 3.0; 0.0; 2.0; 1.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Giannis Antetokounmpo,9.4,4.4,13.8,7,11.0; 8.0; 14.0; 20.0; 14.0; 7.0; 10.0,8.0; 7.0; 9.0; 7.0; 5.0; 4.0; 3.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Simone Fontecchio,4.1,2.0,6.1,7,0.0; 4.0; 4.0; 2.0; 3.0; 5.0; 3.0,3.0; 1.0; 2.0; 1.0; 1.0; 1.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Myron Gardner,4.7,1.5,6.3,7,1.0; 2.0; 5.0; 7.0; 1.0; 7.0; 4.0,1.0; 0.0; 1.0; 2.0; 0.0; 0.0; 1.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Vladislav Goldin,2.9,1.2,4.1,7,1.0; 2.0; 1.0; 0.0; 0.0; 5.0; 0.0,0.0; 0.0; 1.0; 1.0; 0.0; 0.0; 0.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Tim Hardaway Jr.,3.1,2.0,5.0,7,0.0; 2.0; 3.0; 1.0; 1.0; 2.0; 2.0,0.0; 0.0; 1.0; 1.0; 2.0; 0.0; 3.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Keshad Johnson,4.4,3.0,7.3,7,3.0; 2.0; 5.0; 3.0; 5.0; 7.0; 1.0,0.0; 1.0; 3.0; 3.0; 2.0; 5.0; 3.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Nikola Jovic,5.0,3.2,8.2,7,6.0; 5.0; 6.0; 3.0; 3.0; 8.0; 3.0,2.0; 5.0; 4.0; 0.0; 3.0; 7.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Trevor Keels,2.6,1.7,4.3,7,0.0; 0.0; 0.0; 1.0; 1.0; 2.0; 1.0,0.0; 0.0; 0.0; 0.0; 0.0; 2.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Pelle Larsson,3.0,2.2,5.3,7,0.0; 2.0; 0.0; 0.0; 3.0; 2.0; 2.0,0.0; 0.0; 0.0; 1.0; 3.0; 3.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Bez Mbeng,4.4,3.5,7.9,7,5.0; 3.0; 6.0; 5.0; 2.0; 3.0; 4.0,6.0; 1.0; 7.0; 6.0; 1.0; 3.0; 4.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Miami Heat,Davion Mitchell,3.3,3.7,7.0,7,4.0; 1.0; 1.0; 6.0; 0.0; 4.0; 0.0,9.0; 6.0; 6.0; 12.0; 2.0; 1.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Kyle Anderson,3.4,3.8,7.2,7,6.0; 3.0; 4.0; 0.0; 3.0; 1.0; 2.0,6.0; 5.0; 4.0; 2.0; 3.0; 4.0; 6.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Scottie Barnes,6.8,4.1,11.0,7,11.0; 5.0; 6.0; 6.0; 10.0; 12.0; 4.0,6.0; 3.0; 9.0; 4.0; 4.0; 4.0; 5.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,RJ Barrett,4.6,3.1,7.7,7,6.0; 8.0; 4.0; 6.0; 3.0; 2.0; 4.0,2.0; 5.0; 4.0; 4.0; 1.0; 4.0; 3.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Jamison Battle,2.9,1.6,4.5,7,2.0; 3.0; 1.0; 3.0; 1.0; 1.0; 1.0,0.0; 0.0; 0.0; 0.0; 2.0; 1.0; 1.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Chucky Hepburn,2.5,2.5,5.0,7,0.0; 1.0; 0.0; 0.0; 3.0; 1.0; 0.0,2.0; 0.0; 2.0; 0.0; 8.0; 3.0; 0.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Andre Jackson Jr.,3.4,1.4,4.8,7,1.0; 0.0; 0.0; 0.0; 3.0; 1.0; 5.0,2.0; 0.0; 0.0; 0.0; 1.0; 0.0; 1.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Trayce Jackson-Davis,5.2,2.3,7.5,7,1.0; 4.0; 2.0; 10.0; 7.0; 5.0; 4.0,1.0; 1.0; 0.0; 3.0; 1.0; 3.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Trey Jemison III,3.9,1.4,5.3,7,0.0; 2.0; 7.0; 5.0; 2.0; 3.0; 2.0,0.0; 0.0; 4.0; 0.0; 1.0; 0.0; 0.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,A.J. Lawson,3.1,1.3,4.3,7,1.0; 1.0; 0.0; 5.0; 1.0; 1.0; 2.0,0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 1.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Kawhi Leonard,3.8,2.5,6.3,7,6.0; 10.0; 5.0; 4.0; 2.0; 2.0; 0.0,1.0; 4.0; 5.0; 2.0; 2.0; 1.0; 2.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Alijah Martin,3.1,1.3,4.4,7,0.0; 0.0; 0.0; 3.0; 2.0; 0.0; 4.0,0.0; 0.0; 0.0; 1.0; 0.0; 1.0; 0.0
+2026-10-03T23:00Z,NBA,Miami Heat @ Toronto Raptors,Toronto Raptors,Miami Heat,112.9,121.9,234.9,Toronto Raptors,Collin Murray-Boyles,4.1,2.3,6.4,7,4.0; 1.0; 3.0; 2.0; 1.0; 7.0; 3.0,0.0; 2.0; 1.0; 0.0; 1.0; 6.0; 1.0

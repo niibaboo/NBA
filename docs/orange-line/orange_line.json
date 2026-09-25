@@ -849,6 +849,58 @@
         ],
         "n_games": 7
       }
-    ]
+    ],
+    "home_form": {
+      "avg_scored": 113.1,
+      "avg_allowed": 117.1,
+      "n_games": 7,
+      "source": "prior_season",
+      "scored_list": [
+        118.0,
+        103.0,
+        105.0,
+        120.0,
+        126.0,
+        102.0,
+        118.0
+      ],
+      "allowed_list": [
+        137.0,
+        112.0,
+        117.0,
+        109.0,
+        96.0,
+        124.0,
+        125.0
+      ]
+    },
+    "away_form": {
+      "avg_scored": 120.9,
+      "avg_allowed": 111.6,
+      "n_games": 7,
+      "source": "prior_season",
+      "scored_list": [
+        124.0,
+        108.0,
+        115.0,
+        117.0,
+        111.0,
+        153.0,
+        118.0
+      ],
+      "allowed_list": [
+        103.0,
+        110.0,
+        121.0,
+        105.0,
+        119.0,
+        104.0,
+        119.0
+      ]
+    },
+    "exp_home": 112.9,
+    "exp_away": 121.9,
+    "exp_total": 234.9,
+    "total_std": 15.6
   }
 ]
