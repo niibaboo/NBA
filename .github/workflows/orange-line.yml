@@ -1,0 +1,42 @@
+name: Orange Line
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # NBA plays most days of the season, unlike the once/twice-weekly
+    # sports elsewhere in this repo -- daily at 11:00 UTC (early morning
+    # US time, after the previous night's games are final but well
+    # before that evening's tip-offs). Same caveat as every other
+    # project's schedule here though: these crons have been unreliable
+    # in this repo before, so don't rely on this firing -- trigger
+    # manually via the Actions tab if a day's predictions look stale.
+    - cron: '0 11 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Orange Line
+        run: python3 orange_line.py
+
+      - name: Commit and push updated predictions
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/orange-line
+          git diff --staged --quiet || git commit -m "Update Orange Line predictions"
+          git push
