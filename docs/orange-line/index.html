@@ -1,11 +1,222 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=orange-line/">
-  <title>Orange Line</title>
-</head>
-<body>
-  <p>Redirecting to <a href="orange-line/">Orange Line</a>…</p>
-</body>
-</html>
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Orange Line — NBA</title></head>
+<body style="background:#0f0a08;color:#e8dcd0;font-family:Arial;padding:12px;max-width:600px;margin:auto">
+<h2 style="text-align:center;color:#ff9a2e">🟠 ORANGE LINE — NBA Player Props</h2>
+<p style="text-align:center;color:#998;font-size:11px">Recency-weighted, Poisson-projected · Last 7g · 25 Sep 12:03</p>
+<p style="text-align:center;margin-bottom:16px"><a href="orange_line_predictions.csv" download style="background:#2a201a;border:1px solid #443;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px">⬇ Download CSV</a></p>
+
+<div style="background:#1a1310;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #3a2a20">
+  <div style="font-size:14px;font-weight:bold;margin-bottom:10px">🎯 Safest Bet Builder</div>
+  <div id="categoryToggles" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:12px"></div>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+    <label style="font-size:12px;color:#c9a">Target odds:</label>
+    <input id="targetOdds" type="number" step="0.1" min="1.1" value="5.0"
+      style="width:70px;background:#0f0a08;border:1px solid #443;color:white;border-radius:6px;padding:6px 8px;font-size:13px">
+    <label style="font-size:12px;color:#c9a">Max legs:</label>
+    <input id="maxLegs" type="number" step="1" min="2" value="8"
+      style="width:55px;background:#0f0a08;border:1px solid #443;color:white;border-radius:6px;padding:6px 8px;font-size:13px">
+    <button onclick="buildSafest()"
+      style="background:#c9642a;border:none;color:white;padding:7px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+      Build
+    </button>
+    <button onclick="buildSafest()"
+      style="background:#2a201a;border:1px solid #443;color:white;padding:7px 14px;border-radius:6px;font-size:13px;cursor:pointer">
+      🔀 Shuffle
+    </button>
+  </div>
+  <div id="builderResult" style="font-size:12px;color:#998">
+    Untick any market type you don't want considered, set a target odds and
+    leg cap, then tap Build. It rotates through whichever categories are
+    ticked, groups near-tied legs and shuffles within each group so it draws
+    from more of today's games rather than always the exact same few, and
+    caps at 2 legs per game to avoid stacking correlated legs from one
+    matchup. Tap Shuffle for a fresh pick among equally-safe options without
+    changing your settings.
+  </div>
+</div>
+<script>
+const LEGS = [{"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Kyle Anderson Over 2.0 Rebounds", "prob": 66, "category": "Rebounds", "hit_rate": {"hits": 4, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.4 (7gm)", "history": "6.0/3.0/4.0/0.0/3.0/1.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "2993874", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Kyle Anderson Over 2.5 Assists", "prob": 73, "category": "Assists", "hit_rate": {"hits": 6, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.8 (7gm)", "history": "6.0/5.0/4.0/2.0/3.0/4.0/6.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "2993874", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Kyle Anderson Over 5.0 Rebounds+Assists", "prob": 72, "category": "Rebounds+Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 7.2 (7gm)", "history": "12.0/8.0/8.0/2.0/6.0/5.0/8.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.0, "player_id": "2993874", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Scottie Barnes Over 4.5 Rebounds", "prob": 81, "category": "Rebounds", "hit_rate": {"hits": 6, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 6.8 (7gm)", "history": "11.0/5.0/6.0/6.0/10.0/12.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 4.5, "player_id": "4433134", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Scottie Barnes Over 2.5 Assists", "prob": 78, "category": "Assists", "hit_rate": {"hits": 7, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.1 (7gm)", "history": "6.0/3.0/9.0/4.0/4.0/4.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "4433134", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Scottie Barnes Over 7.5 Rebounds+Assists", "prob": 86, "category": "Rebounds+Assists", "hit_rate": {"hits": 7, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 11.0 (7gm)", "history": "17.0/8.0/15.0/10.0/14.0/16.0/9.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 7.5, "player_id": "4433134", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "RJ Barrett Over 3.0 Rebounds", "prob": 67, "category": "Rebounds", "hit_rate": {"hits": 5, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.6 (7gm)", "history": "6.0/8.0/4.0/6.0/3.0/2.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4395625", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "RJ Barrett Over 2.0 Assists", "prob": 60, "category": "Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.1 (7gm)", "history": "2.0/5.0/4.0/4.0/1.0/4.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4395625", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "RJ Barrett Over 5.5 Rebounds+Assists", "prob": 78, "category": "Rebounds+Assists", "hit_rate": {"hits": 6, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 7.7 (7gm)", "history": "8.0/13.0/8.0/10.0/4.0/6.0/7.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.5, "player_id": "4395625", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Jamison Battle Over 2.0 Rebounds", "prob": 55, "category": "Rebounds", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 2.9 (7gm)", "history": "2.0/3.0/1.0/3.0/1.0/1.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4431893", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Jamison Battle Over 1.0 Assists", "prob": 48, "category": "Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 1.6 (7gm)", "history": "0.0/0.0/0.0/0.0/2.0/1.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "4431893", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Jamison Battle Over 3.0 Rebounds+Assists", "prob": 66, "category": "Rebounds+Assists", "hit_rate": {"hits": 0, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.5 (7gm)", "history": "2.0/3.0/1.0/3.0/3.0/2.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4431893", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Chucky Hepburn Over 1.5 Rebounds", "prob": 71, "category": "Rebounds", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 2.5 (7gm)", "history": "0.0/1.0/0.0/0.0/3.0/1.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "4590360", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Chucky Hepburn Over 1.5 Assists", "prob": 71, "category": "Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 2.5 (7gm)", "history": "2.0/0.0/2.0/0.0/8.0/3.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "4590360", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Chucky Hepburn Over 3.5 Rebounds+Assists", "prob": 73, "category": "Rebounds+Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 5.0 (7gm)", "history": "2.0/1.0/2.0/0.0/11.0/4.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.5, "player_id": "4590360", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Andre Jackson Jr. Over 2.0 Rebounds", "prob": 66, "category": "Rebounds", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.4 (7gm)", "history": "1.0/0.0/0.0/0.0/3.0/1.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4432190", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Andre Jackson Jr. Over 1.0 Assists", "prob": 41, "category": "Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 1.4 (7gm)", "history": "2.0/0.0/0.0/0.0/1.0/0.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "4432190", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Andre Jackson Jr. Over 3.0 Rebounds+Assists", "prob": 71, "category": "Rebounds+Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.8 (7gm)", "history": "3.0/0.0/0.0/0.0/4.0/1.0/6.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4432190", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trayce Jackson-Davis Over 3.5 Rebounds", "prob": 76, "category": "Rebounds", "hit_rate": {"hits": 5, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 5.2 (7gm)", "history": "1.0/4.0/2.0/10.0/7.0/5.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.5, "player_id": "4431684", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trayce Jackson-Davis Over 1.5 Assists", "prob": 67, "category": "Assists", "hit_rate": {"hits": 3, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 2.3 (7gm)", "history": "1.0/1.0/0.0/3.0/1.0/3.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "4431684", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trayce Jackson-Davis Over 5.0 Rebounds+Assists", "prob": 76, "category": "Rebounds+Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 7.5 (7gm)", "history": "2.0/5.0/2.0/13.0/8.0/8.0/6.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.0, "player_id": "4431684", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trey Jemison III Over 2.5 Rebounds", "prob": 75, "category": "Rebounds", "hit_rate": {"hits": 3, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.9 (7gm)", "history": "0.0/2.0/7.0/5.0/2.0/3.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "4395623", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trey Jemison III Over 1.0 Assists", "prob": 41, "category": "Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 1.4 (7gm)", "history": "0.0/0.0/4.0/0.0/1.0/0.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "4395623", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trey Jemison III Over 3.5 Rebounds+Assists", "prob": 77, "category": "Rebounds+Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 5.3 (7gm)", "history": "0.0/2.0/11.0/5.0/3.0/3.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.5, "player_id": "4395623", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "A.J. Lawson Over 2.0 Rebounds", "prob": 60, "category": "Rebounds", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.1 (7gm)", "history": "1.0/1.0/0.0/5.0/1.0/1.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4067017", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "A.J. Lawson Over 0.5 Assists", "prob": 73, "category": "Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 1.3 (7gm)", "history": "0.0/0.0/0.0/0.0/0.0/0.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 0.5, "player_id": "4067017", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "A.J. Lawson Over 3.0 Rebounds+Assists", "prob": 62, "category": "Rebounds+Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.3 (7gm)", "history": "1.0/1.0/0.0/5.0/1.0/1.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4067017", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Kawhi Leonard Over 2.5 Rebounds", "prob": 73, "category": "Rebounds", "hit_rate": {"hits": 4, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.8 (7gm)", "history": "6.0/10.0/5.0/4.0/2.0/2.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "6450", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Kawhi Leonard Over 1.5 Assists", "prob": 71, "category": "Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 2.5 (7gm)", "history": "1.0/4.0/5.0/2.0/2.0/1.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "6450", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Kawhi Leonard Over 4.5 Rebounds+Assists", "prob": 75, "category": "Rebounds+Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 6.3 (7gm)", "history": "7.0/14.0/10.0/6.0/4.0/3.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 4.5, "player_id": "6450", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Alijah Martin Over 2.0 Rebounds", "prob": 60, "category": "Rebounds", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 3.1 (7gm)", "history": "0.0/0.0/0.0/3.0/2.0/0.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4702656", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Alijah Martin Over 0.5 Assists", "prob": 73, "category": "Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 1.3 (7gm)", "history": "0.0/0.0/0.0/1.0/0.0/1.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 0.5, "player_id": "4702656", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Alijah Martin Over 3.0 Rebounds+Assists", "prob": 64, "category": "Rebounds+Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.4 (7gm)", "history": "0.0/0.0/0.0/4.0/2.0/1.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4702656", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Collin Murray-Boyles Over 2.5 Rebounds", "prob": 78, "category": "Rebounds", "hit_rate": {"hits": 4, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 4.1 (7gm)", "history": "4.0/1.0/3.0/2.0/1.0/7.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "5093267", "stat_key": "REB", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Collin Murray-Boyles Over 1.5 Assists", "prob": 67, "category": "Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 2.3 (7gm)", "history": "0.0/2.0/1.0/0.0/1.0/6.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "5093267", "stat_key": "AST", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Collin Murray-Boyles Over 4.5 Rebounds+Assists", "prob": 76, "category": "Rebounds+Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Toronto Raptors \u00b7 NBA \u00b7 proj 6.4 (7gm)", "history": "4.0/3.0/4.0/2.0/2.0/13.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 4.5, "player_id": "5093267", "stat_key": "RA", "is_home": true, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Bam Adebayo Over 4.0 Rebounds", "prob": 74, "category": "Rebounds", "hit_rate": {"hits": 6, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 6.2 (7gm)", "history": "5.0/12.0/8.0/9.0/4.0/7.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 4.0, "player_id": "4066261", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Bam Adebayo Over 1.5 Assists", "prob": 67, "category": "Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 2.3 (7gm)", "history": "4.0/2.0/4.0/3.0/0.0/2.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "4066261", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Bam Adebayo Over 6.0 Rebounds+Assists", "prob": 73, "category": "Rebounds+Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 8.4 (7gm)", "history": "9.0/14.0/12.0/12.0/4.0/9.0/6.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 6.0, "player_id": "4066261", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Giannis Antetokounmpo Over 6.5 Rebounds", "prob": 83, "category": "Rebounds", "hit_rate": {"hits": 7, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 9.4 (7gm)", "history": "11.0/8.0/14.0/20.0/14.0/7.0/10.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 6.5, "player_id": "3032977", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Giannis Antetokounmpo Over 3.0 Assists", "prob": 64, "category": "Assists", "hit_rate": {"hits": 6, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.4 (7gm)", "history": "8.0/7.0/9.0/7.0/5.0/4.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "3032977", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Giannis Antetokounmpo Over 9.5 Rebounds+Assists", "prob": 88, "category": "Rebounds+Assists", "hit_rate": {"hits": 7, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 13.8 (7gm)", "history": "19.0/15.0/23.0/27.0/19.0/11.0/13.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 9.5, "player_id": "3032977", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Simone Fontecchio Over 2.5 Rebounds", "prob": 78, "category": "Rebounds", "hit_rate": {"hits": 5, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.1 (7gm)", "history": "0.0/4.0/4.0/2.0/3.0/5.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "3899664", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Simone Fontecchio Over 1.0 Assists", "prob": 59, "category": "Assists", "hit_rate": {"hits": 3, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 2.0 (7gm)", "history": "3.0/1.0/2.0/1.0/1.0/1.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "3899664", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Simone Fontecchio Over 4.0 Rebounds+Assists", "prob": 73, "category": "Rebounds+Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 6.1 (7gm)", "history": "3.0/5.0/6.0/3.0/4.0/6.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 4.0, "player_id": "3899664", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Myron Gardner Over 3.0 Rebounds", "prob": 69, "category": "Rebounds", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.7 (7gm)", "history": "1.0/2.0/5.0/7.0/1.0/7.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4431772", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Myron Gardner Over 1.0 Assists", "prob": 44, "category": "Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 1.5 (7gm)", "history": "1.0/0.0/1.0/2.0/0.0/0.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "4431772", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Myron Gardner Over 4.5 Rebounds+Assists", "prob": 75, "category": "Rebounds+Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 6.3 (7gm)", "history": "2.0/2.0/6.0/9.0/1.0/7.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 4.5, "player_id": "4431772", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Vladislav Goldin Over 2.0 Rebounds", "prob": 55, "category": "Rebounds", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 2.9 (7gm)", "history": "1.0/2.0/1.0/0.0/0.0/5.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4700818", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Vladislav Goldin Over 0.5 Assists", "prob": 70, "category": "Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 1.2 (7gm)", "history": "0.0/0.0/1.0/1.0/0.0/0.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 0.5, "player_id": "4700818", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Vladislav Goldin Over 2.5 Rebounds+Assists", "prob": 78, "category": "Rebounds+Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.1 (7gm)", "history": "1.0/2.0/2.0/1.0/0.0/5.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "4700818", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Tim Hardaway Jr. Over 2.0 Rebounds", "prob": 60, "category": "Rebounds", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.1 (7gm)", "history": "0.0/2.0/3.0/1.0/1.0/2.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "2528210", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Tim Hardaway Jr. Over 1.0 Assists", "prob": 59, "category": "Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 2.0 (7gm)", "history": "0.0/0.0/1.0/1.0/2.0/0.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "2528210", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Tim Hardaway Jr. Over 3.5 Rebounds+Assists", "prob": 73, "category": "Rebounds+Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 5.0 (7gm)", "history": "0.0/2.0/4.0/2.0/3.0/2.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.5, "player_id": "2528210", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Keshad Johnson Over 3.0 Rebounds", "prob": 64, "category": "Rebounds", "hit_rate": {"hits": 3, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.4 (7gm)", "history": "3.0/2.0/5.0/3.0/5.0/7.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4431786", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Keshad Johnson Over 2.0 Assists", "prob": 58, "category": "Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.0 (7gm)", "history": "0.0/1.0/3.0/3.0/2.0/5.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4431786", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Keshad Johnson Over 5.0 Rebounds+Assists", "prob": 74, "category": "Rebounds+Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 7.3 (7gm)", "history": "3.0/3.0/8.0/6.0/7.0/12.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.0, "player_id": "4431786", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Nikola Jovic Over 3.5 Rebounds", "prob": 73, "category": "Rebounds", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 5.0 (7gm)", "history": "6.0/5.0/6.0/3.0/3.0/8.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.5, "player_id": "4997528", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Nikola Jovic Over 2.0 Assists", "prob": 62, "category": "Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.2 (7gm)", "history": "2.0/5.0/4.0/0.0/3.0/7.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4997528", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Nikola Jovic Over 5.5 Rebounds+Assists", "prob": 83, "category": "Rebounds+Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 8.2 (7gm)", "history": "8.0/10.0/10.0/3.0/6.0/15.0/5.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.5, "player_id": "4997528", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trevor Keels Over 1.5 Rebounds", "prob": 73, "category": "Rebounds", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 2.6 (7gm)", "history": "0.0/0.0/0.0/1.0/1.0/2.0/1.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "4432645", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trevor Keels Over 1.0 Assists", "prob": 51, "category": "Assists", "hit_rate": {"hits": 2, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 1.7 (7gm)", "history": "0.0/0.0/0.0/0.0/0.0/2.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.0, "player_id": "4432645", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Trevor Keels Over 3.0 Rebounds+Assists", "prob": 62, "category": "Rebounds+Assists", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.3 (7gm)", "history": "0.0/0.0/0.0/1.0/1.0/4.0/3.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4432645", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Pelle Larsson Over 2.0 Rebounds", "prob": 58, "category": "Rebounds", "hit_rate": {"hits": 1, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.0 (7gm)", "history": "0.0/2.0/0.0/0.0/3.0/2.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4601025", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Pelle Larsson Over 1.5 Assists", "prob": 65, "category": "Assists", "hit_rate": {"hits": 3, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 2.2 (7gm)", "history": "0.0/0.0/0.0/1.0/3.0/3.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 1.5, "player_id": "4601025", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Pelle Larsson Over 3.5 Rebounds+Assists", "prob": 77, "category": "Rebounds+Assists", "hit_rate": {"hits": 3, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 5.3 (7gm)", "history": "0.0/2.0/0.0/1.0/6.0/5.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.5, "player_id": "4601025", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Bez Mbeng Over 3.0 Rebounds", "prob": 64, "category": "Rebounds", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 4.4 (7gm)", "history": "5.0/3.0/6.0/5.0/2.0/3.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 3.0, "player_id": "4898237", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Bez Mbeng Over 2.5 Assists", "prob": 68, "category": "Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.5 (7gm)", "history": "6.0/1.0/7.0/6.0/1.0/3.0/4.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "4898237", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Bez Mbeng Over 5.5 Rebounds+Assists", "prob": 80, "category": "Rebounds+Assists", "hit_rate": {"hits": 5, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 7.9 (7gm)", "history": "11.0/4.0/13.0/11.0/3.0/6.0/8.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.5, "player_id": "4898237", "stat_key": "RA", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Davion Mitchell Over 2.0 Rebounds", "prob": 64, "category": "Rebounds", "hit_rate": {"hits": 3, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.3 (7gm)", "history": "4.0/1.0/1.0/6.0/0.0/4.0/0.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.0, "player_id": "4278053", "stat_key": "REB", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Davion Mitchell Over 2.5 Assists", "prob": 71, "category": "Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 3.7 (7gm)", "history": "9.0/6.0/6.0/12.0/2.0/1.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 2.5, "player_id": "4278053", "stat_key": "AST", "is_home": false, "league": "NBA"}, {"match": "Miami Heat @ Toronto Raptors (NBA)", "market": "Davion Mitchell Over 5.0 Rebounds+Assists", "prob": 70, "category": "Rebounds+Assists", "hit_rate": {"hits": 4, "total": 7}, "detail": "Miami Heat \u00b7 NBA \u00b7 proj 7.0 (7gm)", "history": "13.0/7.0/7.0/18.0/2.0/5.0/2.0", "game_id": "401902644", "game_date": "2026-10-03", "line": 5.0, "player_id": "4278053", "stat_key": "RA", "is_home": false, "league": "NBA"}];
+
+function initCategoryToggles() {
+  const container = document.getElementById('categoryToggles');
+  const cats = [...new Set(LEGS.map(l => l.category))];
+  container.innerHTML = cats.map(c => `
+    <label style="display:flex;align-items:center;gap:4px;color:#ccc;cursor:pointer">
+      <input type="checkbox" class="catToggle" value="${c}" checked>
+      ${c}
+    </label>
+  `).join('');
+}
+initCategoryToggles();
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function tieredShuffle(legs, bandSize) {
+  const bands = {};
+  legs.forEach(l => {
+    const band = Math.floor(l.prob / bandSize);
+    (bands[band] = bands[band] || []).push(l);
+  });
+  const bandKeys = Object.keys(bands).map(Number).sort((a, b) => b - a);
+  let result = [];
+  bandKeys.forEach(b => { result = result.concat(shuffle(bands[b])); });
+  return result;
+}
+
+function buildSafest() {
+  const target = parseFloat(document.getElementById('targetOdds').value) || 5.0;
+  const maxLegs = parseInt(document.getElementById('maxLegs').value) || 8;
+  const activeCats = [...document.querySelectorAll('.catToggle:checked')].map(el => el.value);
+
+  const byCategory = {};
+  LEGS.filter(l => l.prob > 0 && activeCats.includes(l.category)).forEach(l => {
+    (byCategory[l.category] = byCategory[l.category] || []).push(l);
+  });
+  const categories = Object.keys(byCategory);
+  categories.forEach(c => { byCategory[c] = tieredShuffle(byCategory[c], 5); });
+  const cursor = {};
+  categories.forEach(c => cursor[c] = 0);
+
+  const chosen = [];
+  const matchCount = {};
+  let combinedOdds = 1;
+  let addedThisPass = true;
+
+  while (addedThisPass && combinedOdds < target && chosen.length < maxLegs) {
+    addedThisPass = false;
+    for (const cat of categories) {
+      if (combinedOdds >= target || chosen.length >= maxLegs) break;
+      const arr = byCategory[cat];
+      while (cursor[cat] < arr.length) {
+        const leg = arr[cursor[cat]];
+        cursor[cat]++;
+        const count = matchCount[leg.match] || 0;
+        if (count >= 2) continue;
+        chosen.push(leg);
+        combinedOdds *= 100 / leg.prob;
+        matchCount[leg.match] = count + 1;
+        addedThisPass = true;
+        break;
+      }
+    }
+  }
+
+  const el = document.getElementById('builderResult');
+  if (!chosen.length) {
+    el.innerHTML = 'No legs available to build from.';
+    return;
+  }
+
+  const rows = chosen.map(l =>
+    `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #3a2a20">
+       <span>${l.match}<br><span style="color:#ff9a2e">${l.market}</span> <span style="color:#665">· ${l.category}</span>
+       ${l.detail ? `<br><span style="color:#776;font-size:10px">${l.detail}</span>` : ''}
+       ${l.history ? `<br><span style="color:#665;font-size:10px">last games: ${l.history}</span>` : ''}</span>
+       <span style="text-align:right"><span style="color:#ffeb3b;font-weight:bold">${l.prob}%</span>${l.hit_rate ? `<br><span style="color:#998;font-size:11px">${l.hit_rate.hits}/${l.hit_rate.total}</span>` : ''}</span>
+     </div>`
+  ).join('');
+
+  const capNote = chosen.length >= maxLegs && combinedOdds < target
+    ? ' (hit the leg cap before reaching target — raise Max legs or lower Target odds)'
+    : (combinedOdds < target ? ' (ran out of legs before reaching target)' : '');
+
+  el.innerHTML = `
+    <div style="color:white;font-size:13px;margin-bottom:6px">
+      ${chosen.length} legs · est. combined odds ~<b>${combinedOdds.toFixed(2)}</b>${capNote}
+    </div>
+    ${rows}
+    <div style="color:#776;font-size:10px;margin-top:8px;line-height:1.4">
+      Estimate multiplies each leg's fair odds (100/probability) — real
+      sportsbook odds include their margin and legs within the same game
+      aren't fully independent, so treat this as a ranking tool, not a firm
+      price. All three markets use Poisson projections with the line set
+      below the model's expectation for a safety margin.
+    </div>
+  `;
+}
+</script>
+
+<div style="background:#1a1310;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #3a2a20">
+  <div style="font-size:11px;color:#998;margin-bottom:4px">2026-10-03 23:00 · <span style="color:#ff9a2e">NBA</span></div>
+  <div style="font-size:17px;font-weight:bold;margin-bottom:10px">Miami Heat @ Toronto Raptors</div>
+  <div style="margin-top:8px"><div style="color:#998;font-size:10px;text-transform:uppercase;margin-bottom:2px">Miami Heat</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Bam Adebayo</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 6.2 · AST 2.3 · RA 8.4 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Giannis Antetokounmpo</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 9.4 · AST 4.4 · RA 13.8 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Simone Fontecchio</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 4.1 · AST 2.0 · RA 6.1 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Myron Gardner</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 4.7 · AST 1.5 · RA 6.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Vladislav Goldin</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 2.9 · AST 1.2 · RA 4.1 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Tim Hardaway Jr.</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.1 · AST 2.0 · RA 5.0 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Keshad Johnson</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 4.4 · AST 3.0 · RA 7.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Nikola Jovic</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 5.0 · AST 3.2 · RA 8.2 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Trevor Keels</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 2.6 · AST 1.7 · RA 4.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Pelle Larsson</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.0 · AST 2.2 · RA 5.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Bez Mbeng</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 4.4 · AST 3.5 · RA 7.9 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Davion Mitchell</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.3 · AST 3.7 · RA 7.0 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div></div><div style="margin-top:8px"><div style="color:#998;font-size:10px;text-transform:uppercase;margin-bottom:2px">Toronto Raptors</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Kyle Anderson</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.4 · AST 3.8 · RA 7.2 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Scottie Barnes</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 6.8 · AST 4.1 · RA 11.0 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>RJ Barrett</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 4.6 · AST 3.1 · RA 7.7 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Jamison Battle</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 2.9 · AST 1.6 · RA 4.5 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Chucky Hepburn</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 2.5 · AST 2.5 · RA 5.0 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Andre Jackson Jr.</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.4 · AST 1.4 · RA 4.8 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Trayce Jackson-Davis</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 5.2 · AST 2.3 · RA 7.5 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Trey Jemison III</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.9 · AST 1.4 · RA 5.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>A.J. Lawson</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.1 · AST 1.3 · RA 4.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Kawhi Leonard</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.8 · AST 2.5 · RA 6.3 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Alijah Martin</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 3.1 · AST 1.3 · RA 4.4 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div><div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-top:1px solid #3a2a20">
+  <div>Collin Murray-Boyles</div>
+  <div style="color:#ff9a2e;font-weight:bold">REB 4.1 · AST 2.3 · RA 6.4 <span style="color:#776;font-weight:normal">(7gm)</span></div>
+</div></div>
+</div>
+</body></html>
