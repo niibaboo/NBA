@@ -609,6 +609,8 @@ def build_hot_form_entries(predictions):
                         entries.append({
                             "name": prop["name"], "team": team_name, "league": p.get("league", ""),
                             "match": p["match"], "stat": stat_key, "avg": avg, "values": lastn,
+                            "player_id": prop["player_id"], "game_id": p.get("game_id"),
+                            "date": p.get("date", ""), "threshold": HOT_FORM_MIN[stat_key],
                         })
     entries.sort(key=lambda e: -e["avg"])
     return entries
@@ -627,6 +629,8 @@ def build_real_streak_entries(predictions):
                             "name": prop["name"], "team": team_name, "league": p.get("league", ""),
                             "match": p["match"], "stat": stat_key, "streak_len": streak_len,
                             "streak_games": values[-streak_len:], "full_sample": streak_len >= len(values),
+                            "player_id": prop["player_id"], "game_id": p.get("game_id"),
+                            "date": p.get("date", ""), "threshold": REAL_STREAK_THRESHOLD[stat_key],
                         })
     entries.sort(key=lambda e: -e["streak_len"])
     return entries
@@ -844,6 +848,9 @@ HTML_TEMPLATE = """<!DOCTYPE html><html><head><meta charset="utf-8">
 <h2 style="text-align:center;color:#ff9a2e">🟠 ORANGE LINE — NBA Player Props</h2>
 <p style="text-align:center;color:#998;font-size:11px">Recency-weighted, Poisson-projected · Last {recent}g · {generated}</p>
 <p style="text-align:center;margin-bottom:16px"><a href="orange_line_predictions.csv" download style="background:#2a201a;border:1px solid #443;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px">⬇ Download CSV</a></p>
+<p style="text-align:center;margin-bottom:16px">
+  <a href="results/index.html" style="color:#ffeb3b;text-decoration:none;font-size:12px">📊 Results Tracker</a>
+</p>
 {builder}
 {streak_panel}
 {cards}
@@ -934,3 +941,12 @@ if __name__ == "__main__":
     with open('docs/orange-line/orange_line.json', 'w') as f:
         json.dump(predictions, f, indent=2, default=str)
     print(f"\nDone — {len(predictions)} games projected.")
+
+    try:
+        import orange_line_results_tracker
+        legs = build_legs(predictions)
+        hot_form = build_hot_form_entries(predictions)
+        real_streak = build_real_streak_entries(predictions)
+        orange_line_results_tracker.run_results_tracker(legs, hot_form, real_streak)
+    except Exception as e:
+        print(f"[!] Results tracker failed, but the rest of this run succeeded: {e}")
